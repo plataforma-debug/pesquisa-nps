@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard NPS - Just</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --just-navy: #2D2E83;
+            --just-navy-dark: #1E1F5E;
+            --just-navy-light: #4546A5;
+            --just-coral: #EF6461;
+            --just-coral-light: #FF8A88;
+            --just-navy-10: rgba(45, 46, 131, 0.08);
+            --just-navy-20: rgba(45, 46, 131, 0.15);
+            --gray-50: #F7F8FC;
+            --gray-100: #EEEEF5;
+            --gray-200: #DDDDE8;
+            --gray-300: #BCBCD0;
+            --gray-400: #9797B0;
+            --gray-500: #6E6E8A;
+            --gray-600: #55556E;
+            --gray-800: #1A1A2E;
+            --white: #FFFFFF;
+            --nps-red: #EF4444;
+            --nps-yellow: #FBBF24;
+            --nps-green: #22C55E;
+            --nps-green-dark: #16A34A;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--gray-50);
+            color: var(--gray-800);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .dashboard-header {
+            background: var(--just-navy);
+            color: var(--white);
+            padding: 1.25rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(45, 46, 131, 0.3);
+        }
+        .header-left { display: flex; align-items: center; gap: 1rem; }
+        .header-left h1 { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.3px; }
+        .header-left h1 span { color: var(--just-coral); }
+        .header-right { display: flex; align-items: center; gap: 1rem; }
+        .btn-refresh {
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: var(--white);
+            padding: 7px 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.82rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .btn-refresh:hover { background: rgba(255,255,255,0.2); }
+        .last-update { font-size: 0.75rem; opacity: 0.6; }
+
+        /* FILTERS */
+        .filters-bar {
+            background: var(--white);
+            border-bottom: 1px solid var(--gray-100);
+            padding: 0.85rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            position: sticky;
+            top: 56px;
+            z-index: 99;
+            box-shadow: 0 2px 6px rgba(45,46,131,0.04);
+        }
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .filter-label {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: var(--gray-400);
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .filter-select {
+            font-family: inherit;
+            font-size: 0.82rem;
+            padding: 6px 28px 6px 10px;
+            border: 1.5px solid var(--gray-200);
+            border-radius: 8px;
+            background: var(--white);
+            color: var(--gray-800);
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239797B0' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            transition: border-color 0.2s;
+            min-width: 140px;
+        }
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--just-navy);
+            box-shadow: 0 0 0 3px var(--just-navy-20);
+        }
+        .filter-clear {
+            font-family: inherit;
+            font-size: 0.75rem;
+            color: var(--just-coral);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: background 0.15s;
+        }
+        .filter-clear:hover { background: rgba(239,100,97,0.08); }
+        .filter-count {
+            font-size: 0.75rem;
+            color: var(--gray-400);
+            margin-left: auto;
+        }
+
+        /* LOADING */
+        .loading-overlay {
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; padding: 6rem 2rem; gap: 1rem;
+        }
+        .loading-spinner-lg {
+            width: 40px; height: 40px;
+            border: 4px solid var(--gray-200);
+            border-top-color: var(--just-navy);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-text { color: var(--gray-400); font-size: 0.9rem; }
+
+        .dashboard-main { max-width: 1200px; margin: 0 auto; padding: 1.5rem 2rem; }
+
+        /* STATS CARDS */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .stat-card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 1.25rem 1.5rem;
+            box-shadow: 0 2px 8px rgba(45, 46, 131, 0.05);
+            border: 1px solid var(--gray-100);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(45, 46, 131, 0.08); }
+        .stat-label {
+            font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.8px;
+            color: var(--gray-400); font-weight: 600; margin-bottom: 0.4rem;
+        }
+        .stat-value { font-size: 2.2rem; font-weight: 700; color: var(--just-navy); line-height: 1.1; }
+        .stat-sub { font-size: 0.75rem; color: var(--gray-400); margin-top: 0.2rem; }
+        .stat-card.nps-score .stat-value { font-size: 2.8rem; }
+        .nps-zone {
+            display: inline-block; padding: 2px 10px; border-radius: 6px;
+            font-size: 0.7rem; font-weight: 600; text-transform: uppercase;
+            letter-spacing: 0.5px; margin-top: 0.4rem;
+        }
+        .nps-zone.critical { background: #FEE2E2; color: #DC2626; }
+        .nps-zone.improvement { background: #FEF3C7; color: #D97706; }
+        .nps-zone.quality { background: #D1FAE5; color: #059669; }
+        .nps-zone.excellence { background: #A7F3D0; color: #047857; }
+
+        /* CHARTS */
+        .charts-grid {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 1.25rem; margin-bottom: 1.5rem;
+        }
+        .chart-card {
+            background: var(--white); border-radius: 16px; padding: 1.25rem 1.5rem;
+            box-shadow: 0 2px 8px rgba(45, 46, 131, 0.05); border: 1px solid var(--gray-100);
+        }
+        .chart-card h3 { font-size: 0.9rem; font-weight: 600; color: var(--gray-800); margin-bottom: 0.75rem; }
+        .chart-container { position: relative; height: 230px; }
+
+        /* NPS BREAKDOWN */
+        .nps-breakdown {
+            display: flex; border-radius: 10px; overflow: hidden;
+            height: 32px; margin-top: 0.5rem; margin-bottom: 0.4rem;
+        }
+        .nps-breakdown .segment {
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.7rem; font-weight: 600; color: var(--white); transition: flex 0.4s ease;
+            min-width: 30px;
+        }
+        .nps-breakdown .detractors { background: var(--nps-red); }
+        .nps-breakdown .passives { background: var(--nps-yellow); color: var(--gray-800); }
+        .nps-breakdown .promoters { background: var(--nps-green); }
+        .breakdown-legend { display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--gray-500); }
+        .breakdown-legend span { display: flex; align-items: center; gap: 4px; }
+        .breakdown-legend .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+
+        /* SAT BARS */
+        .sat-bars { display: flex; flex-direction: column; gap: 0.75rem; }
+        .sat-bar-item { display: flex; align-items: center; gap: 0.6rem; }
+        .sat-bar-label { font-size: 0.8rem; font-weight: 500; color: var(--gray-600); min-width: 95px; }
+        .sat-bar-track { flex: 1; height: 26px; background: var(--gray-100); border-radius: 8px; overflow: hidden; }
+        .sat-bar-fill {
+            height: 100%; border-radius: 8px;
+            display: flex; align-items: center; justify-content: flex-end;
+            padding-right: 10px; font-size: 0.73rem; font-weight: 700;
+            color: var(--white); transition: width 0.6s ease;
+        }
+
+        /* COMMENTS SECTION */
+        .comments-section {
+            background: var(--white); border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(45, 46, 131, 0.05);
+            border: 1px solid var(--gray-100); margin-bottom: 1.5rem;
+        }
+        .comments-header {
+            padding: 1rem 1.5rem; border-bottom: 1px solid var(--gray-100);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .comments-header h3 { font-size: 0.9rem; font-weight: 600; }
+        .comments-grid {
+            display: grid; grid-template-columns: 1fr;
+            max-height: 420px; overflow-y: auto; padding: 0.5rem;
+        }
+        .comment-card {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--gray-100);
+            transition: background 0.15s;
+        }
+        .comment-card:last-child { border-bottom: none; }
+        .comment-card:hover { background: var(--just-navy-10); }
+        .comment-card-header {
+            display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.4rem;
+        }
+        .comment-company {
+            font-weight: 600; font-size: 0.85rem; color: var(--gray-800);
+        }
+        .comment-date {
+            font-size: 0.7rem; color: var(--gray-400); margin-left: auto;
+        }
+        .comment-text {
+            font-size: 0.84rem; color: var(--gray-600); line-height: 1.5;
+            margin-top: 0.25rem;
+        }
+        .comment-area {
+            font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.5px;
+            font-weight: 600; padding: 2px 8px; border-radius: 4px;
+        }
+        .comment-area.nps-area { background: var(--just-navy-10); color: var(--just-navy); }
+        .comment-area.atend-area { background: rgba(239,100,97,0.1); color: var(--just-coral); }
+        .comment-area.entregas-area { background: rgba(34,197,94,0.1); color: var(--nps-green-dark); }
+        .no-comments { text-align: center; padding: 2rem; color: var(--gray-400); font-size: 0.85rem; }
+
+        /* RESPONSES TABLE */
+        .responses-section {
+            background: var(--white); border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(45, 46, 131, 0.05);
+            border: 1px solid var(--gray-100); overflow: hidden;
+        }
+        .responses-header {
+            padding: 1rem 1.5rem; border-bottom: 1px solid var(--gray-100);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .responses-header h3 { font-size: 0.9rem; font-weight: 600; }
+        .responses-count {
+            font-size: 0.75rem; color: var(--gray-400);
+            background: var(--gray-100); padding: 3px 10px; border-radius: 20px;
+        }
+        .responses-table { width: 100%; border-collapse: collapse; }
+        .responses-table thead th {
+            padding: 0.7rem 0.85rem; font-size: 0.7rem; text-transform: uppercase;
+            letter-spacing: 0.8px; color: var(--gray-400); font-weight: 600;
+            text-align: left; background: var(--gray-50); border-bottom: 1px solid var(--gray-100);
+        }
+        .responses-table tbody tr {
+            border-bottom: 1px solid var(--gray-100); transition: background 0.15s;
+        }
+        .responses-table tbody tr:hover { background: var(--just-navy-10); }
+        .responses-table tbody tr:last-child { border-bottom: none; }
+        .responses-table td {
+            padding: 0.75rem 0.85rem; font-size: 0.82rem; color: var(--gray-600); vertical-align: top;
+        }
+        .nps-badge {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 30px; height: 30px; border-radius: 8px; font-weight: 700;
+            font-size: 0.82rem; color: var(--white);
+        }
+        .nps-badge.detractor { background: var(--nps-red); }
+        .nps-badge.passive { background: var(--nps-yellow); color: var(--gray-800); }
+        .nps-badge.promoter { background: var(--nps-green); }
+        .sat-badge {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 26px; height: 26px; border-radius: 6px; font-weight: 600;
+            font-size: 0.78rem; background: var(--just-navy-10); color: var(--just-navy);
+        }
+        .company-name { font-weight: 600; color: var(--gray-800); }
+        .table-scroll { max-height: 460px; overflow-y: auto; }
+
+        /* EMPTY STATE */
+        .empty-state { text-align: center; padding: 4rem 2rem; }
+        .empty-state .emoji { font-size: 3rem; margin-bottom: 1rem; }
+        .empty-state h3 { font-size: 1.1rem; color: var(--gray-600); margin-bottom: 0.5rem; }
+        .empty-state p { color: var(--gray-400); font-size: 0.85rem; }
+
+        /* RESPONSIVE */
+        @media (max-width: 900px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .charts-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 600px) {
+            .dashboard-main { padding: 1rem; }
+            .stats-grid { grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+            .stat-card { padding: 1rem; }
+            .stat-value { font-size: 1.8rem !important; }
+            .stat-card.nps-score .stat-value { font-size: 2.2rem !important; }
+            .dashboard-header { padding: 1rem; flex-direction: column; gap: 0.5rem; }
+            .filters-bar { padding: 0.75rem 1rem; top: 88px; }
+            .filter-select { min-width: 110px; font-size: 0.78rem; }
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(14px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-in { animation: fadeUp 0.45s ease-out forwards; opacity: 0; }
+        .d1 { animation-delay: 0.03s; } .d2 { animation-delay: 0.06s; }
+        .d3 { animation-delay: 0.09s; } .d4 { animation-delay: 0.12s; }
+        .d5 { animation-delay: 0.18s; } .d6 { animation-delay: 0.24s; }
+        .d7 { animation-delay: 0.3s; } .d8 { animation-delay: 0.36s; }
+    </style>
+</head>
+<body>
+
+<header class="dashboard-header">
+    <div class="header-left">
+        <h1>📊 Dashboard <span>NPS</span> — Just</h1>
+    </div>
+    <div class="header-right">
+        <span class="last-update" id="lastUpdate"></span>
+        <button class="btn-refresh" onclick="loadData()">↻ Atualizar</button>
+    </div>
+</header>
+
+<div class="filters-bar" id="filtersBar" style="display:none;">
+    <div class="filter-group">
+        <span class="filter-label">Período</span>
+        <select class="filter-select" id="filterPeriod" onchange="applyFilters()">
+            <option value="all">Todo período</option>
+            <option value="current_year">Ano atual</option>
+            <option value="previous_year">Ano anterior</option>
+            <option value="current_month">Mês atual</option>
+            <option value="previous_month">Mês anterior</option>
+            <option value="current_quarter">Trimestre atual</option>
+            <option value="previous_quarter">Trimestre anterior</option>
+        </select>
+    </div>
+    <div class="filter-group">
+        <span class="filter-label">Cliente</span>
+        <select class="filter-select" id="filterClient" onchange="applyFilters()">
+            <option value="all">Todos os clientes</option>
+        </select>
+    </div>
+    <div class="filter-group">
+        <span class="filter-label">Qualificação</span>
+        <select class="filter-select" id="filterQualification" onchange="applyFilters()">
+            <option value="all">Todas</option>
+            <option value="detractor">Detratores (0-6)</option>
+            <option value="passive">Neutros (7-8)</option>
+            <option value="promoter">Promotores (9-10)</option>
+        </select>
+    </div>
+    <button class="filter-clear" onclick="clearFilters()">Limpar filtros</button>
+    <span class="filter-count" id="filterCount"></span>
+</div>
+
+<main class="dashboard-main" id="dashboardContent">
+    <div class="loading-overlay">
+        <div class="loading-spinner-lg"></div>
+        <span class="loading-text">Carregando dados da pesquisa...</span>
+    </div>
+</main>
+
+<script>
+const API_URL = 'https://script.google.com/macros/s/AKfycbwYbadvfZQ0skd8bax4Wt9KcrNWjsr3VRi0CcInL8eygMfLPnfhAdfN2mpQ6NqYjB2C/exec';
+
+let allResponses = [];
+let chartNps = null;
+let chartSat = null;
+
+// =============================================
+// PARSE DATE (dd/MM/yyyy HH:mm:ss)
+// =============================================
+function parseDate(str) {
+    if (!str) return null;
+    if (str instanceof Date) return str;
+    const s = String(str);
+    // Try dd/MM/yyyy HH:mm:ss
+    const m = s.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    if (m) return new Date(parseInt(m[3]), parseInt(m[2]) - 1, parseInt(m[1]));
+    // Fallback
+    const d = new Date(s);
+    return isNaN(d.getTime()) ? null : d;
+}
+
+// =============================================
+// PERIOD FILTER
+// =============================================
+function getQuarter(date) { return Math.floor(date.getMonth() / 3) + 1; }
+
+function filterByPeriod(responses, period) {
+    if (period === 'all') return responses;
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth();
+    const q = getQuarter(now);
+
+    return responses.filter(r => {
+        const d = parseDate(r.timestamp);
+        if (!d) return false;
+        switch (period) {
+            case 'current_year': return d.getFullYear() === year;
+            case 'previous_year': return d.getFullYear() === year - 1;
+            case 'current_month': return d.getFullYear() === year && d.getMonth() === month;
+            case 'previous_month':
+                const pm = month === 0 ? 11 : month - 1;
+                const py = month === 0 ? year - 1 : year;
+                return d.getFullYear() === py && d.getMonth() === pm;
+            case 'current_quarter':
+                return d.getFullYear() === year && getQuarter(d) === q;
+            case 'previous_quarter':
+                const pq = q === 1 ? 4 : q - 1;
+                const pqy = q === 1 ? year - 1 : year;
+                return d.getFullYear() === pqy && getQuarter(d) === pq;
+            default: return true;
+        }
+    });
+}
+
+// =============================================
+// LOAD DATA
+// =============================================
+async function loadData() {
+    const content = document.getElementById('dashboardContent');
+    content.innerHTML = `
+        <div class="loading-overlay">
+            <div class="loading-spinner-lg"></div>
+            <span class="loading-text">Carregando dados da pesquisa...</span>
+        </div>`;
+
+    try {
+        const response = await fetch(API_URL);
+        const data = await response.json();
+
+        if (!data || data.length === 0) {
+            document.getElementById('filtersBar').style.display = 'none';
+            content.innerHTML = `
+                <div class="empty-state">
+                    <div class="emoji">📋</div>
+                    <h3>Nenhuma resposta ainda</h3>
+                    <p>As respostas aparecerão aqui assim que os clientes responderem.</p>
+                </div>`;
+            return;
+        }
+
+        allResponses = data.map(r => ({
+            timestamp: r['Timestamp'] || r['timestamp'] || '',
+            nps: parseInt(r['NPS'] || r['nps'] || 0),
+            npsComment: r['Comentário NPS'] || r['npsComment'] || '',
+            atendimento: parseInt(r['Atendimento'] || r['atendimento'] || 0),
+            atendimentoComment: r['Comentário Atendimento'] || r['atendimentoComment'] || '',
+            entregas: parseInt(r['Entregas'] || r['entregas'] || 0),
+            entregasComment: r['Comentário Entregas'] || r['entregasComment'] || '',
+            company: r['Empresa'] || r['company'] || '',
+            email: r['Email'] || r['email'] || ''
+        }));
+
+        // Populate client filter
+        const clients = [...new Set(allResponses.map(r => r.company).filter(c => c))].sort();
+        const sel = document.getElementById('filterClient');
+        sel.innerHTML = '<option value="all">Todos os clientes</option>';
+        clients.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c; opt.textContent = c;
+            sel.appendChild(opt);
+        });
+
+        document.getElementById('filtersBar').style.display = 'flex';
+        applyFilters();
+
+        document.getElementById('lastUpdate').textContent =
+            'Atualizado: ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+    } catch (error) {
+        content.innerHTML = `
+            <div class="empty-state">
+                <div class="emoji">⚠️</div>
+                <h3>Erro ao carregar dados</h3>
+                <p>${error.message}</p>
+            </div>`;
+    }
+}
+
+// =============================================
+// APPLY FILTERS
+// =============================================
+function applyFilters() {
+    const period = document.getElementById('filterPeriod').value;
+    const client = document.getElementById('filterClient').value;
+    const qual = document.getElementById('filterQualification').value;
+
+    let filtered = [...allResponses];
+
+    filtered = filterByPeriod(filtered, period);
+
+    if (client !== 'all') filtered = filtered.filter(r => r.company === client);
+
+    if (qual === 'detractor') filtered = filtered.filter(r => r.nps <= 6);
+    else if (qual === 'passive') filtered = filtered.filter(r => r.nps >= 7 && r.nps <= 8);
+    else if (qual === 'promoter') filtered = filtered.filter(r => r.nps >= 9);
+
+    document.getElementById('filterCount').textContent =
+        filtered.length + ' de ' + allResponses.length + ' respostas';
+
+    renderDashboard(filtered);
+}
+
+function clearFilters() {
+    document.getElementById('filterPeriod').value = 'all';
+    document.getElementById('filterClient').value = 'all';
+    document.getElementById('filterQualification').value = 'all';
+    applyFilters();
+}
+
+// =============================================
+// RENDER
+// =============================================
+function renderDashboard(responses) {
+    const content = document.getElementById('dashboardContent');
+
+    if (responses.length === 0) {
+        content.innerHTML = `
+            <div class="empty-state">
+                <div class="emoji">🔍</div>
+                <h3>Nenhuma resposta encontrada</h3>
+                <p>Tente ajustar os filtros para ver resultados.</p>
+            </div>`;
+        return;
+    }
+
+    const total = responses.length;
+    const detractors = responses.filter(r => r.nps <= 6);
+    const passives = responses.filter(r => r.nps >= 7 && r.nps <= 8);
+    const promoters = responses.filter(r => r.nps >= 9);
+
+    const detPct = Math.round((detractors.length / total) * 100);
+    const pasPct = Math.round((passives.length / total) * 100);
+    const proPct = Math.round((promoters.length / total) * 100);
+    const npsScore = proPct - detPct;
+
+    const avgAtend = (responses.reduce((s, r) => s + r.atendimento, 0) / total).toFixed(1);
+    const avgEntregas = (responses.reduce((s, r) => s + r.entregas, 0) / total).toFixed(1);
+
+    let npsZoneClass = 'critical', npsZoneLabel = 'Zona Crítica';
+    if (npsScore >= 0 && npsScore < 50) { npsZoneClass = 'improvement'; npsZoneLabel = 'Aperfeiçoamento'; }
+    if (npsScore >= 50 && npsScore < 75) { npsZoneClass = 'quality'; npsZoneLabel = 'Qualidade'; }
+    if (npsScore >= 75) { npsZoneClass = 'excellence'; npsZoneLabel = 'Excelência'; }
+
+    const npsDistribution = Array(11).fill(0);
+    responses.forEach(r => { if (r.nps >= 0 && r.nps <= 10) npsDistribution[r.nps]++; });
+
+    const atendDist = [0, 0, 0, 0];
+    const entregasDist = [0, 0, 0, 0];
+    responses.forEach(r => {
+        if (r.atendimento >= 1 && r.atendimento <= 4) atendDist[r.atendimento - 1]++;
+        if (r.entregas >= 1 && r.entregas <= 4) entregasDist[r.entregas - 1]++;
+    });
+
+    // Collect all comments
+    const comments = [];
+    responses.forEach(r => {
+        if (r.npsComment && r.npsComment.trim())
+            comments.push({ company: r.company, date: r.timestamp, text: r.npsComment, area: 'NPS', areaClass: 'nps-area', nps: r.nps });
+        if (r.atendimentoComment && r.atendimentoComment.trim())
+            comments.push({ company: r.company, date: r.timestamp, text: r.atendimentoComment, area: 'Atendimento', areaClass: 'atend-area', nps: r.nps });
+        if (r.entregasComment && r.entregasComment.trim())
+            comments.push({ company: r.company, date: r.timestamp, text: r.entregasComment, area: 'Entregas', areaClass: 'entregas-area', nps: r.nps });
+    });
+    comments.reverse();
+
+    const npsColor = npsScore >= 50 ? 'var(--nps-green-dark)' : npsScore >= 0 ? '#D97706' : 'var(--nps-red)';
+
+    content.innerHTML = `
+        <div class="stats-grid">
+            <div class="stat-card nps-score animate-in d1">
+                <div class="stat-label">Score NPS</div>
+                <div class="stat-value" style="color:${npsColor}">${npsScore}</div>
+                <div class="nps-zone ${npsZoneClass}">${npsZoneLabel}</div>
+            </div>
+            <div class="stat-card animate-in d2">
+                <div class="stat-label">Total Respostas</div>
+                <div class="stat-value">${total}</div>
+                <div class="stat-sub">${promoters.length} promotores · ${passives.length} neutros · ${detractors.length} detratores</div>
+            </div>
+            <div class="stat-card animate-in d3">
+                <div class="stat-label">Atendimento</div>
+                <div class="stat-value">${avgAtend}<span style="font-size:0.9rem;color:var(--gray-400)"> /4</span></div>
+                <div class="stat-sub">Média geral</div>
+            </div>
+            <div class="stat-card animate-in d4">
+                <div class="stat-label">Entregas</div>
+                <div class="stat-value">${avgEntregas}<span style="font-size:0.9rem;color:var(--gray-400)"> /4</span></div>
+                <div class="stat-sub">Média geral</div>
+            </div>
+        </div>
+
+        <div class="charts-grid">
+            <div class="chart-card animate-in d5">
+                <h3>Distribuição NPS (0-10)</h3>
+                <div class="nps-breakdown">
+                    <div class="segment detractors" style="flex:${detPct || 0.1}">${detPct}%</div>
+                    <div class="segment passives" style="flex:${pasPct || 0.1}">${pasPct}%</div>
+                    <div class="segment promoters" style="flex:${proPct || 0.1}">${proPct}%</div>
+                </div>
+                <div class="breakdown-legend">
+                    <span><span class="dot" style="background:var(--nps-red)"></span>Detratores (0-6)</span>
+                    <span><span class="dot" style="background:var(--nps-yellow)"></span>Neutros (7-8)</span>
+                    <span><span class="dot" style="background:var(--nps-green)"></span>Promotores (9-10)</span>
+                </div>
+                <div class="chart-container" style="margin-top:0.75rem;"><canvas id="chartNps"></canvas></div>
+            </div>
+            <div class="chart-card animate-in d6">
+                <h3>Satisfação por Área</h3>
+                <div class="sat-bars">
+                    <div class="sat-bar-item">
+                        <span class="sat-bar-label">Atendimento</span>
+                        <div class="sat-bar-track"><div class="sat-bar-fill" style="width:${(avgAtend/4*100)}%;background:var(--just-navy);">${avgAtend}</div></div>
+                    </div>
+                    <div class="sat-bar-item">
+                        <span class="sat-bar-label">Entregas</span>
+                        <div class="sat-bar-track"><div class="sat-bar-fill" style="width:${(avgEntregas/4*100)}%;background:var(--just-coral);">${avgEntregas}</div></div>
+                    </div>
+                </div>
+                <div class="chart-container" style="margin-top:1rem;"><canvas id="chartSat"></canvas></div>
+            </div>
+        </div>
+
+        <!-- COMMENTS -->
+        <div class="comments-section animate-in d7">
+            <div class="comments-header">
+                <h3>💬 Comentários</h3>
+                <span class="responses-count">${comments.length} comentários</span>
+            </div>
+            ${comments.length === 0 ? '<div class="no-comments">Nenhum comentário registrado neste período.</div>' : `
+            <div class="comments-grid">
+                ${comments.map(c => `
+                    <div class="comment-card">
+                        <div class="comment-card-header">
+                            <span class="nps-badge ${c.nps <= 6 ? 'detractor' : c.nps <= 8 ? 'passive' : 'promoter'}" style="width:24px;height:24px;font-size:0.7rem;border-radius:6px;">${c.nps}</span>
+                            <span class="comment-company">${c.company || 'Anônimo'}</span>
+                            <span class="comment-area ${c.areaClass}">${c.area}</span>
+                            <span class="comment-date">${c.date}</span>
+                        </div>
+                        <div class="comment-text">"${c.text}"</div>
+                    </div>
+                `).join('')}
+            </div>`}
+        </div>
+
+        <!-- RESPONSES TABLE -->
+        <div class="responses-section animate-in d8">
+            <div class="responses-header">
+                <h3>📋 Respostas Individuais</h3>
+                <span class="responses-count">${total} respostas</span>
+            </div>
+            <div class="table-scroll">
+                <table class="responses-table">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Empresa</th>
+                            <th>NPS</th>
+                            <th>Atend.</th>
+                            <th>Entregas</th>
+                            <th>Email</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${responses.slice().reverse().map(r => `
+                            <tr>
+                                <td style="white-space:nowrap;font-size:0.75rem;color:var(--gray-400);">${r.timestamp}</td>
+                                <td class="company-name">${r.company}</td>
+                                <td><span class="nps-badge ${r.nps<=6?'detractor':r.nps<=8?'passive':'promoter'}">${r.nps}</span></td>
+                                <td><span class="sat-badge">${r.atendimento}</span></td>
+                                <td><span class="sat-badge">${r.entregas}</span></td>
+                                <td style="font-size:0.75rem;color:var(--gray-400);">${r.email||'—'}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+
+    renderNpsChart(npsDistribution);
+    renderSatChart(atendDist, entregasDist);
+}
+
+// =============================================
+// CHARTS
+// =============================================
+function renderNpsChart(dist) {
+    if (chartNps) chartNps.destroy();
+    const ctx = document.getElementById('chartNps').getContext('2d');
+    chartNps = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['0','1','2','3','4','5','6','7','8','9','10'],
+            datasets: [{
+                data: dist,
+                backgroundColor: dist.map((_,i) => i<=6?'#EF4444':i<=8?'#FBBF24':'#22C55E'),
+                borderRadius: 6, borderSkipped: false,
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => c.raw + (c.raw===1?' resposta':' respostas') }}},
+            scales: {
+                y: { beginAtZero:true, ticks:{stepSize:1,font:{size:11,family:'DM Sans'},color:'#9797B0'}, grid:{color:'#EEEEF5'}},
+                x: { ticks:{font:{size:11,family:'DM Sans',weight:600},color:'#6E6E8A'}, grid:{display:false}}
+            }
+        }
+    });
+}
+
+function renderSatChart(atendDist, entregasDist) {
+    if (chartSat) chartSat.destroy();
+    const ctx = document.getElementById('chartSat').getContext('2d');
+    chartSat = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Péssimo (1)','Ruim (2)','Bom (3)','Ótimo (4)'],
+            datasets: [
+                { label:'Atendimento', data:atendDist, backgroundColor:'#2D2E83', borderRadius:6, borderSkipped:false },
+                { label:'Entregas', data:entregasDist, backgroundColor:'#EF6461', borderRadius:6, borderSkipped:false }
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+                legend: { position:'bottom', labels:{font:{size:11,family:'DM Sans'},color:'#6E6E8A',padding:14,usePointStyle:true,pointStyle:'circle'}},
+                tooltip: { callbacks: { label: c => c.dataset.label+': '+c.raw+(c.raw===1?' resposta':' respostas') }}
+            },
+            scales: {
+                y: { beginAtZero:true, ticks:{stepSize:1,font:{size:11,family:'DM Sans'},color:'#9797B0'}, grid:{color:'#EEEEF5'}},
+                x: { ticks:{font:{size:10,family:'DM Sans'},color:'#6E6E8A'}, grid:{display:false}}
+            }
+        }
+    });
+}
+
+loadData();
+</script>
+</body>
+</html>
