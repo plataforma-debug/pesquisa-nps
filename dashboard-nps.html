@@ -484,7 +484,8 @@ async function loadData() {
 
     try {
         const response = await fetch(API_URL);
-        const data = await response.json();
+        const json = await response.json();
+        const data = json.data || json;
 
         if (!data || data.length === 0) {
             document.getElementById('filtersBar').style.display = 'none';
