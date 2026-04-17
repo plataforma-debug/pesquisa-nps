@@ -485,9 +485,18 @@ async function loadData() {
     try {
         const response = await fetch(API_URL);
         const json = await response.json();
-        const data = json.data || json;
 
-        if (!data || data.length === 0) {
+        // Suporta ambos os formatos: { data: [...] } ou array direto
+        let rawData;
+        if (Array.isArray(json)) {
+            rawData = json;
+        } else if (json && Array.isArray(json.data)) {
+            rawData = json.data;
+        } else {
+            rawData = [];
+        }
+
+        if (!rawData || rawData.length === 0) {
             document.getElementById('filtersBar').style.display = 'none';
             content.innerHTML = `
                 <div class="empty-state">
@@ -498,16 +507,19 @@ async function loadData() {
             return;
         }
 
-        allResponses = data.map(r => ({
-            timestamp: r['Timestamp'] || r['timestamp'] || '',
-            nps: parseInt(r['NPS'] || r['nps'] || 0),
-            npsComment: r['Comentário NPS'] || r['npsComment'] || '',
-            atendimento: parseInt(r['Atendimento'] || r['atendimento'] || 0),
-            atendimentoComment: r['Comentário Atendimento'] || r['atendimentoComment'] || '',
-            entregas: parseInt(r['Entregas'] || r['entregas'] || 0),
-            entregasComment: r['Comentário Entregas'] || r['entregasComment'] || '',
-            company: r['Empresa'] || r['company'] || '',
-            email: r['Email'] || r['email'] || ''
+        allResponses = rawData.map(r => ({
+            timestamp: r.timestamp || r['Timestamp'] || r['Data e hora'] || '',
+            nps: parseInt(r.nps || r['NPS'] || r['NPS (0-10)'] || 0),
+            npsComment: r.npsComment || r['Comentário NPS'] || r['npsComment'] || '',
+            atendimento: parseInt(r.atendimento || r['Nota Atendimento'] || r['Atendimento'] || r['Atendimento (1-4)'] || 0),
+            atendimentoComment: r.atendimentoComment || r['Comentário Atendimento'] || '',
+            entregas: parseInt(r.entregas || r['Nota Entregas de produto'] || r['Entregas'] || r['Entregas (1-4)'] || 0),
+            entregasComment: r.entregasComment || r['Comentário Entregas'] || r['Comentário Entregas de produto'] || '',
+            produtos: parseInt(r.produtos || r['Nota Plataformas'] || r['Produtos (1-4)'] || 0),
+            produtosComment: r.produtosComment || r['Comentário Plataformas'] || r['Comentário Produtos'] || '',
+            company: r.company || r['Empresa'] || '',
+            email: r.email || r['Email'] || r['E-mail'] || '',
+            status: r.status || r['Status'] || ''
         }));
 
         // Populate client filter
