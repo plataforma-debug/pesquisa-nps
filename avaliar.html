@@ -530,7 +530,7 @@ function autoSave() {
     try {
         fetch(SCRIPT_URL, {
             method: 'POST', mode: 'no-cors',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             body: JSON.stringify(collectCurrentData())
         });
     } catch (err) { console.error('Auto-save erro:', err); }
@@ -582,7 +582,7 @@ document.getElementById('npsForm').addEventListener('submit', async (e) => {
         if (SCRIPT_URL) {
             await fetch(SCRIPT_URL, {
                 method: 'POST', mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                 body: JSON.stringify(payload)
             });
         }
