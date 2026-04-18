@@ -55,10 +55,25 @@
             box-shadow: 0 4px 20px rgba(45, 46, 131, 0.3);
         }
         .header-left { display: flex; align-items: center; gap: 0.75rem; }
-        .header-logo { height: 36px; width: auto; border-radius: 6px; }
+        .header-logo { height: 52px; width: auto; border-radius: 8px; }
         .header-center { text-align: center; }
-        .header-center h1 { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.3px; white-space: nowrap; }
-        .header-center h1 span { color: var(--just-coral); }
+        .header-center h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            white-space: nowrap;
+            background: linear-gradient(135deg, #ffffff 0%, #c7c8ff 50%, var(--just-coral-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+        }
+        .header-center h1 span { -webkit-text-fill-color: var(--just-coral-light); }
+        .header-center .header-subtitle {
+            font-size: 0.75rem; opacity: 0.5; letter-spacing: 2px;
+            text-transform: uppercase; margin-top: 2px;
+        }
         .header-right { display: flex; align-items: center; justify-content: flex-end; gap: 1rem; }
         .btn-refresh {
             background: rgba(255,255,255,0.12);
@@ -162,7 +177,7 @@
         /* STATS CARDS */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(5, 1fr);
             gap: 1rem;
             margin-bottom: 1.5rem;
         }
@@ -179,18 +194,40 @@
             font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.8px;
             color: var(--gray-400); font-weight: 600; margin-bottom: 0.4rem;
         }
-        .stat-value { font-size: 2.2rem; font-weight: 700; color: var(--just-navy); line-height: 1.1; }
+        .stat-value { font-size: 2.5rem; font-weight: 700; color: var(--just-navy); line-height: 1.1; margin-bottom: 0.3rem; }
         .stat-sub { font-size: 0.75rem; color: var(--gray-400); margin-top: 0.2rem; }
-        .stat-card.nps-score .stat-value { font-size: 2.8rem; }
+        .stat-card.nps-score .stat-value { font-size: 3.2rem; font-weight: 800; }
         .nps-zone {
             display: inline-block; padding: 2px 10px; border-radius: 6px;
             font-size: 0.7rem; font-weight: 600; text-transform: uppercase;
+            margin-bottom: 0.15rem;
             letter-spacing: 0.5px; margin-top: 0.4rem;
         }
         .nps-zone.critical { background: #FEE2E2; color: #DC2626; }
+        .nps-zone.attention { background: #FFEDD5; color: #EA580C; }
         .nps-zone.improvement { background: #FEF3C7; color: #D97706; }
         .nps-zone.quality { background: #D1FAE5; color: #059669; }
         .nps-zone.excellence { background: #A7F3D0; color: #047857; }
+
+        .sat-progress { margin-top: 0.75rem; }
+        .sat-progress-track {
+            height: 14px; background: var(--gray-100); border-radius: 7px;
+            overflow: visible; position: relative;
+        }
+        .sat-progress-track .sat-progress-fill {
+            overflow: hidden;
+        }
+        .sat-progress-fill {
+            height: 100%; border-radius: 7px; transition: width 0.6s ease;
+        }
+        .sat-progress-info {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-top: 3px; font-size: 0.68rem;
+        }
+        .sat-pct { font-weight: 700; }
+        .sat-meta { color: var(--gray-400); }
+        .sat-pct.above-meta { color: #059669; }
+        .sat-pct.below-meta { color: #B8860B; }
 
         /* CHARTS */
         .charts-grid {
@@ -272,10 +309,20 @@
             font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.5px;
             font-weight: 600; padding: 2px 8px; border-radius: 4px;
         }
-        .comment-area.nps-area { background: var(--just-navy-10); color: var(--just-navy); }
-        .comment-area.atend-area { background: rgba(239,100,97,0.1); color: var(--just-coral); }
-        .comment-area.entregas-area { background: rgba(34,197,94,0.1); color: var(--nps-green-dark); }
+        .comment-area.nps-area { background: rgba(34,197,94,0.1); color: #16A34A; }
+        .comment-area.atend-area { background: rgba(45,46,131,0.1); color: #2D2E83; }
+        .comment-area.entregas-area { background: rgba(239,100,97,0.1); color: #EF6461; }
+        .comment-area.produtos-area { background: rgba(139,92,246,0.1); color: #8B5CF6; }
         .no-comments { text-align: center; padding: 2rem; color: var(--gray-400); font-size: 0.85rem; }
+        .comment-filters { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+        .comment-filter-btn {
+            font-family: inherit; font-size: 0.72rem; font-weight: 600;
+            padding: 4px 12px; border-radius: 20px; border: 1.5px solid var(--gray-200);
+            background: var(--white); color: var(--gray-500); cursor: pointer;
+            transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.3px;
+        }
+        .comment-filter-btn:hover { border-color: var(--just-navy); color: var(--just-navy); }
+        .comment-filter-btn.active { background: var(--just-navy); color: var(--white); border-color: var(--just-navy); }
 
         /* RESPONSES TABLE */
         .responses-section {
@@ -329,6 +376,9 @@
         .empty-state p { color: var(--gray-400); font-size: 0.85rem; }
 
         /* RESPONSIVE */
+        @media (max-width: 1100px) {
+            .stats-grid { grid-template-columns: repeat(3, 1fr); }
+        }
         @media (max-width: 900px) {
             .stats-grid { grid-template-columns: repeat(2, 1fr); }
             .charts-grid { grid-template-columns: 1fr; }
@@ -340,6 +390,7 @@
             .stat-value { font-size: 1.8rem !important; }
             .stat-card.nps-score .stat-value { font-size: 2.2rem !important; }
             .dashboard-header { padding: 1rem; grid-template-columns: 1fr; gap: 0.5rem; justify-items: center; }
+            .header-center h1 { font-size: 1.5rem; }
             .header-left { justify-content: center; }
             .header-right { justify-content: center; }
             .filters-bar { padding: 0.75rem 1rem; top: 88px; }
@@ -365,6 +416,7 @@
     </div>
     <div class="header-center">
         <h1>Dashboard <span>NPS</span></h1>
+        <div class="header-subtitle">Pesquisa de Satisfação</div>
     </div>
     <div class="header-right">
         <span class="last-update" id="lastUpdate"></span>
@@ -439,11 +491,45 @@ function parseDate(str) {
     if (str instanceof Date) return str;
     const s = String(str);
     // Try dd/MM/yyyy HH:mm:ss
-    const m = s.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-    if (m) return new Date(parseInt(m[3]), parseInt(m[2]) - 1, parseInt(m[1]));
-    // Fallback
+    const m = s.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})\s*(\d{1,2})?:?(\d{1,2})?:?(\d{1,2})?/);
+    if (m) return new Date(parseInt(m[3]), parseInt(m[2]) - 1, parseInt(m[1]), parseInt(m[4]||0), parseInt(m[5]||0), parseInt(m[6]||0));
+    // Fallback ISO
     const d = new Date(s);
     return isNaN(d.getTime()) ? null : d;
+}
+
+// =============================================
+// FORMAT DATE to dd/MM/yyyy HH:mm (Brasília)
+// =============================================
+function formatDate(str) {
+    if (!str) return '—';
+    const s = String(str);
+
+    // Se já está em dd/MM/yyyy, retorna como está (limpo)
+    const brMatch = s.match(/^(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):(\d{2})/);
+    if (brMatch) return brMatch[0].substring(0, 16);
+
+    // ISO format ou similar — converter para Brasília (-3h)
+    const d = new Date(s);
+    if (isNaN(d.getTime())) return s;
+
+    // Usa toLocaleString para fuso de Brasília
+    try {
+        return d.toLocaleString('pt-BR', {
+            timeZone: 'America/Sao_Paulo',
+            day: '2-digit', month: '2-digit', year: 'numeric',
+            hour: '2-digit', minute: '2-digit'
+        });
+    } catch(e) {
+        // Fallback manual -3h
+        const br = new Date(d.getTime() - 3 * 60 * 60 * 1000);
+        const dd = String(br.getUTCDate()).padStart(2,'0');
+        const mm = String(br.getUTCMonth()+1).padStart(2,'0');
+        const yy = br.getUTCFullYear();
+        const hh = String(br.getUTCHours()).padStart(2,'0');
+        const mi = String(br.getUTCMinutes()).padStart(2,'0');
+        return dd+'/'+mm+'/'+yy+' '+hh+':'+mi;
+    }
 }
 
 // =============================================
@@ -616,6 +702,32 @@ function renderDashboard(responses) {
 
     const avgAtend = (responses.reduce((s, r) => s + r.atendimento, 0) / total).toFixed(1);
     const avgEntregas = (responses.reduce((s, r) => s + r.entregas, 0) / total).toFixed(1);
+    const avgProdutos = (responses.reduce((s, r) => s + r.produtos, 0) / total).toFixed(1);
+
+    // % Satisfação (notas 3+4 = satisfeito, meta 80%)
+    const satAtend = Math.round(responses.filter(r => r.atendimento >= 3).length / total * 100);
+    const satEntregas = Math.round(responses.filter(r => r.entregas >= 3).length / total * 100);
+    const satProdutos = Math.round(responses.filter(r => r.produtos >= 3).length / total * 100);
+
+    // Zona de satisfação por área (baseada em % de satisfeitos)
+    function satZone(pct) {
+        if (pct >= 90) return { cls: 'excellence', label: 'Excelência' };
+        if (pct >= 80) return { cls: 'quality', label: 'Qualidade' };
+        if (pct >= 65) return { cls: 'improvement', label: 'Aperfeiçoamento' };
+        if (pct >= 50) return { cls: 'attention', label: 'Atenção' };
+        return { cls: 'critical', label: 'Crítico' };
+    }
+    const zoneAtend = satZone(satAtend);
+    const zoneEntregas = satZone(satEntregas);
+    const zoneProdutos = satZone(satProdutos);
+
+    function satBarColor(pct) {
+        if (pct >= 90) return '#047857';
+        if (pct >= 80) return '#16A34A';
+        if (pct >= 65) return '#D97706';
+        if (pct >= 50) return '#EA580C';
+        return '#EF4444';
+    }
 
     let npsZoneClass = 'critical', npsZoneLabel = 'Zona Crítica';
     if (npsScore >= 0 && npsScore < 50) { npsZoneClass = 'improvement'; npsZoneLabel = 'Aperfeiçoamento'; }
@@ -627,9 +739,11 @@ function renderDashboard(responses) {
 
     const atendDist = [0, 0, 0, 0];
     const entregasDist = [0, 0, 0, 0];
+    const produtosDist = [0, 0, 0, 0];
     responses.forEach(r => {
         if (r.atendimento >= 1 && r.atendimento <= 4) atendDist[r.atendimento - 1]++;
         if (r.entregas >= 1 && r.entregas <= 4) entregasDist[r.entregas - 1]++;
+        if (r.produtos >= 1 && r.produtos <= 4) produtosDist[r.produtos - 1]++;
     });
 
     // Collect all comments
@@ -641,6 +755,8 @@ function renderDashboard(responses) {
             comments.push({ company: r.company, date: r.timestamp, text: r.atendimentoComment, area: 'Atendimento', areaClass: 'atend-area', nps: r.nps });
         if (r.entregasComment && r.entregasComment.trim())
             comments.push({ company: r.company, date: r.timestamp, text: r.entregasComment, area: 'Entregas', areaClass: 'entregas-area', nps: r.nps });
+        if (r.produtosComment && r.produtosComment.trim())
+            comments.push({ company: r.company, date: r.timestamp, text: r.produtosComment, area: 'Produtos', areaClass: 'produtos-area', nps: r.nps });
     });
     comments.reverse();
 
@@ -679,21 +795,70 @@ function renderDashboard(responses) {
                 <div class="stat-label">Score NPS</div>
                 <div class="stat-value" style="color:${npsColor}">${npsScore}</div>
                 <div class="nps-zone ${npsZoneClass}">${npsZoneLabel}</div>
+                <div class="sat-progress" style="margin-top:0.6rem;">
+                    <div class="sat-progress-track" style="position:relative;">
+                        <div class="sat-progress-fill" style="width:${Math.max(0, Math.min(100, (npsScore + 100) / 2))}%;background:${npsColor};"></div>
+                        <div style="position:absolute;top:-3px;left:${(65+100)/2}%;width:0;height:calc(100% + 6px);border-left:1px dashed #BCBCD0;" title="Meta: 65"></div>
+                    </div>
+                    <div class="sat-progress-info">
+                        <span class="sat-pct" style="color:${npsColor};">${npsScore >= 65 ? '✓' : ''} NPS ${npsScore}</span>
+                        <span class="sat-meta">Meta: 65</span>
+                    </div>
+                </div>
             </div>
             <div class="stat-card animate-in d2">
                 <div class="stat-label">Total Respostas</div>
-                <div class="stat-value">${total}</div>
-                <div class="stat-sub">${promoters.length} promotores · ${passives.length} neutros · ${detractors.length} detratores</div>
+                <div class="stat-value" style="font-size:2.6rem;">${total}</div>
+                <div class="stat-sub" style="margin-top:0.4rem; display:flex; flex-direction:column; gap:0.2rem;">
+                    <span style="display:inline-flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:50%;background:#22C55E;display:inline-block;"></span><strong>${promoters.length}</strong> promotores</span>
+                    <span style="display:inline-flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:50%;background:#FBBF24;display:inline-block;"></span><strong>${passives.length}</strong> neutros</span>
+                    <span style="display:inline-flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:50%;background:#EF4444;display:inline-block;"></span><strong>${detractors.length}</strong> detratores</span>
+                </div>
             </div>
             <div class="stat-card animate-in d3">
                 <div class="stat-label">Atendimento</div>
                 <div class="stat-value">${avgAtend}<span style="font-size:0.9rem;color:var(--gray-400)"> /4</span></div>
-                <div class="stat-sub">Média geral</div>
+                <div class="nps-zone ${zoneAtend.cls}" style="font-size:0.65rem;">${zoneAtend.label}</div>
+                <div class="sat-progress">
+                    <div class="sat-progress-track">
+                        <div class="sat-progress-fill" style="width:${satAtend}%;background:${satBarColor(satAtend)};"></div>
+                        <div style="position:absolute;top:-3px;left:80%;width:0;height:calc(100% + 6px);border-left:1px dashed #BCBCD0;" title="Meta: 80%"></div>
+                    </div>
+                    <div class="sat-progress-info">
+                        <span class="sat-pct" style="color:${satBarColor(satAtend)};">${satAtend}% satisfeitos</span>
+                        <span class="sat-meta">Meta: 80%</span>
+                    </div>
+                </div>
             </div>
             <div class="stat-card animate-in d4">
                 <div class="stat-label">Entregas</div>
                 <div class="stat-value">${avgEntregas}<span style="font-size:0.9rem;color:var(--gray-400)"> /4</span></div>
-                <div class="stat-sub">Média geral</div>
+                <div class="nps-zone ${zoneEntregas.cls}" style="font-size:0.65rem;">${zoneEntregas.label}</div>
+                <div class="sat-progress">
+                    <div class="sat-progress-track">
+                        <div class="sat-progress-fill" style="width:${satEntregas}%;background:${satBarColor(satEntregas)};"></div>
+                        <div style="position:absolute;top:-3px;left:80%;width:0;height:calc(100% + 6px);border-left:1px dashed #BCBCD0;" title="Meta: 80%"></div>
+                    </div>
+                    <div class="sat-progress-info">
+                        <span class="sat-pct" style="color:${satBarColor(satEntregas)};">${satEntregas}% satisfeitos</span>
+                        <span class="sat-meta">Meta: 80%</span>
+                    </div>
+                </div>
+            </div>
+            <div class="stat-card animate-in d5">
+                <div class="stat-label">Produtos</div>
+                <div class="stat-value">${avgProdutos}<span style="font-size:0.9rem;color:var(--gray-400)"> /4</span></div>
+                <div class="nps-zone ${zoneProdutos.cls}" style="font-size:0.65rem;">${zoneProdutos.label}</div>
+                <div class="sat-progress">
+                    <div class="sat-progress-track">
+                        <div class="sat-progress-fill" style="width:${satProdutos}%;background:${satBarColor(satProdutos)};"></div>
+                        <div style="position:absolute;top:-3px;left:80%;width:0;height:calc(100% + 6px);border-left:1px dashed #BCBCD0;" title="Meta: 80%"></div>
+                    </div>
+                    <div class="sat-progress-info">
+                        <span class="sat-pct" style="color:${satBarColor(satProdutos)};">${satProdutos}% satisfeitos</span>
+                        <span class="sat-meta">Meta: 80%</span>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -722,6 +887,10 @@ function renderDashboard(responses) {
                     <div class="sat-bar-item">
                         <span class="sat-bar-label">Entregas</span>
                         <div class="sat-bar-track"><div class="sat-bar-fill" style="width:${(avgEntregas/4*100)}%;background:var(--just-coral);">${avgEntregas}</div></div>
+                    </div>
+                    <div class="sat-bar-item">
+                        <span class="sat-bar-label">Produtos</span>
+                        <div class="sat-bar-track"><div class="sat-bar-fill" style="width:${(avgProdutos/4*100)}%;background:#8B5CF6;">${avgProdutos}</div></div>
                     </div>
                 </div>
                 <div class="chart-container" style="margin-top:1rem;"><canvas id="chartSat"></canvas></div>
@@ -756,7 +925,7 @@ function renderDashboard(responses) {
                             <th>Zona</th>
                             <th>Atend.</th>
                             <th>Entregas</th>
-                            <th>Plataformas</th>
+                            <th>Produtos</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -785,6 +954,13 @@ function renderDashboard(responses) {
         <div class="comments-section animate-in d7">
             <div class="comments-header">
                 <h3>💬 Comentários</h3>
+                <div class="comment-filters">
+                    <button class="comment-filter-btn active" onclick="filterComments('all', this)">Todos</button>
+                    <button class="comment-filter-btn" onclick="filterComments('NPS', this)">NPS</button>
+                    <button class="comment-filter-btn" onclick="filterComments('Atendimento', this)">Atendimento</button>
+                    <button class="comment-filter-btn" onclick="filterComments('Entregas', this)">Entregas</button>
+                    <button class="comment-filter-btn" onclick="filterComments('Produtos', this)">Produtos</button>
+                </div>
                 <span class="responses-count">${comments.length} comentários</span>
             </div>
             ${comments.length === 0 ? '<div class="no-comments">Nenhum comentário registrado neste período.</div>' : `
@@ -795,7 +971,7 @@ function renderDashboard(responses) {
                             <span class="nps-badge ${c.nps <= 6 ? 'detractor' : c.nps <= 8 ? 'passive' : 'promoter'}" style="width:24px;height:24px;font-size:0.7rem;border-radius:6px;">${c.nps}</span>
                             <span class="comment-company">${c.company || 'Anônimo'}</span>
                             <span class="comment-area ${c.areaClass}">${c.area}</span>
-                            <span class="comment-date">${c.date}</span>
+                            <span class="comment-date">${formatDate(c.date)}</span>
                         </div>
                         <div class="comment-text">"${c.text}"</div>
                     </div>
@@ -818,17 +994,19 @@ function renderDashboard(responses) {
                             <th>NPS</th>
                             <th>Atend.</th>
                             <th>Entregas</th>
+                            <th>Prod.</th>
                             <th>Email</th>
                         </tr>
                     </thead>
                     <tbody>
                         ${responses.slice().reverse().map(r => `
                             <tr>
-                                <td style="white-space:nowrap;font-size:0.75rem;color:var(--gray-400);">${r.timestamp}</td>
+                                <td style="white-space:nowrap;font-size:0.75rem;color:var(--gray-400);">${formatDate(r.timestamp)}</td>
                                 <td class="company-name">${r.company}</td>
                                 <td><span class="nps-badge ${r.nps<=6?'detractor':r.nps<=8?'passive':'promoter'}">${r.nps}</span></td>
                                 <td><span class="sat-badge">${r.atendimento}</span></td>
                                 <td><span class="sat-badge">${r.entregas}</span></td>
+                                <td><span class="sat-badge" style="background:rgba(139,92,246,0.1);color:#8B5CF6;">${r.produtos}</span></td>
                                 <td style="font-size:0.75rem;color:var(--gray-400);">${r.email||'—'}</td>
                             </tr>
                         `).join('')}
@@ -839,7 +1017,7 @@ function renderDashboard(responses) {
     `;
 
     renderNpsChart(npsDistribution);
-    renderSatChart(atendDist, entregasDist);
+    renderSatChart(atendDist, entregasDist, produtosDist);
     renderClientResponsesChart(clientAnalysis);
     renderClientNpsChart(clientAnalysis);
 }
@@ -871,7 +1049,7 @@ function renderNpsChart(dist) {
     });
 }
 
-function renderSatChart(atendDist, entregasDist) {
+function renderSatChart(atendDist, entregasDist, produtosDist) {
     if (chartSat) chartSat.destroy();
     const ctx = document.getElementById('chartSat').getContext('2d');
     chartSat = new Chart(ctx, {
@@ -879,8 +1057,9 @@ function renderSatChart(atendDist, entregasDist) {
         data: {
             labels: ['Péssimo (1)','Ruim (2)','Bom (3)','Ótimo (4)'],
             datasets: [
-                { label:'Atendimento', data:atendDist, backgroundColor:'#2D2E83', borderRadius:6, borderSkipped:false },
-                { label:'Entregas', data:entregasDist, backgroundColor:'#EF6461', borderRadius:6, borderSkipped:false }
+                { label:'Atendimento', data:atendDist, backgroundColor:'#2D2E83', borderRadius:0, borderSkipped:false },
+                { label:'Entregas', data:entregasDist, backgroundColor:'#EF6461', borderRadius:0, borderSkipped:false },
+                { label:'Produtos', data:produtosDist, backgroundColor:'#8B5CF6', borderRadius:0, borderSkipped:false }
             ]
         },
         options: {
@@ -890,8 +1069,8 @@ function renderSatChart(atendDist, entregasDist) {
                 tooltip: { callbacks: { label: c => c.dataset.label+': '+c.raw+(c.raw===1?' resposta':' respostas') }}
             },
             scales: {
-                y: { beginAtZero:true, ticks:{stepSize:1,font:{size:11,family:'DM Sans'},color:'#9797B0'}, grid:{color:'#EEEEF5'}},
-                x: { ticks:{font:{size:10,family:'DM Sans'},color:'#6E6E8A'}, grid:{display:false}}
+                y: { stacked: true, beginAtZero:true, ticks:{stepSize:1,font:{size:11,family:'DM Sans'},color:'#9797B0'}, grid:{color:'#EEEEF5'}},
+                x: { stacked: true, ticks:{font:{size:10,family:'DM Sans'},color:'#6E6E8A'}, grid:{display:false}}
             }
         }
     });
@@ -949,6 +1128,7 @@ function renderClientNpsChart(clientData) {
                 borderRadius: 6,
                 borderSkipped: false,
                 barThickness: 22,
+                minBarLength: 8,
             }]
         },
         options: {
@@ -964,6 +1144,46 @@ function renderClientNpsChart(clientData) {
             }
         }
     });
+}
+
+// =============================================
+// COMMENT FILTER
+// =============================================
+function filterComments(area, btn) {
+    // Update active button
+    document.querySelectorAll('.comment-filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    const cards = document.querySelectorAll('.comment-card');
+    let visible = 0;
+    cards.forEach(card => {
+        if (area === 'all') {
+            card.style.display = '';
+            visible++;
+        } else {
+            const areaTag = card.querySelector('.comment-area');
+            if (areaTag && areaTag.textContent.trim().toUpperCase() === area.toUpperCase()) {
+                card.style.display = '';
+                visible++;
+            } else {
+                card.style.display = 'none';
+            }
+        }
+    });
+
+    // Update count
+    const countEl = card => {
+        const section = document.querySelector('.comments-section');
+        if (section) {
+            const countSpan = section.querySelector('.responses-count');
+            if (countSpan) countSpan.textContent = visible + ' comentários';
+        }
+    };
+    const section = document.querySelector('.comments-section');
+    if (section) {
+        const countSpan = section.querySelector('.responses-count');
+        if (countSpan) countSpan.textContent = visible + (visible === 1 ? ' comentário' : ' comentários');
+    }
 }
 
 loadData();
